@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Harga Crypto</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #13131a 0%, #1c1c24 100%);
+            color: #ffffff; 
+            text-align: center; 
+            padding: 30px 15px; 
+            margin: 0;
+            min-height: 100vh;
+        }
+        h1 { color: #f3ba2f; margin-bottom: 5px; font-size: 2em; }
+        p { margin-top: 5px; color: #a0a0b0; }
+        #waktu-update { font-size: 0.9em; color: #888899; margin-bottom: 25px; font-style: italic; }
+        
+        .crypto-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        
+        .card { 
+            background-color: #252530; padding: 25px 20px; border-radius: 16px; 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); width: 240px; 
+            border: 1px solid #333344; transition: transform 0.3s ease; text-align: left; 
+        }
+        .card:hover { transform: translateY(-5px); }
+        
+        .coin-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .coin-icon { width: 32px; height: 32px; }
+        .coin-name { font-size: 1.2em; font-weight: bold; color: #e0e0e0; }
+        
+        .coin-price { font-size: 1.4em; color: #00e676; font-weight: bold; margin-bottom: 15px; }
+        
+        .input-grup label { font-size: 0.9em; color: #a0a0b0; display: block; margin-bottom: 5px; }
+        .input-grup input {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444455;
+            background-color: #1a1a24; color: white; font-size: 1em; margin-bottom: 15px;
+            box-sizing: border-box; 
+        }
+        .input-grup input:focus { outline: none; border-color: #f3ba2f; } 
+        
+        .total-nilai { font-size: 1.2em; color: #f3ba2f; font-weight: bold; border-top: 1px solid #444455; padding-top: 15px;}
+
+        .grand-total-container {
+            background: linear-gradient(135deg, #f3ba2f 0%, #ff9800 100%);
+            color: #13131a; margin-top: 40px; padding: 20px; border-radius: 16px;
+            display: inline-block; min-width: 250px; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.4);
+            transition: transform 0.3s ease;
+        }
+        .grand-total-container:hover { transform: scale(1.05); } 
+        .grand-total-container h2 { margin: 0 0 10px 0; font-size: 1.1em; color: #332200; }
+        #grand-total-angka { font-size: 2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard Crypto Pro</h1>
+    <p>Pantau & Hitung Aset Anda Secara Real-Time</p>
+    <div id="waktu-update">Terakhir diperbarui: Memuat waktu...</div>
+
+    <div class="crypto-container">
+        <div class="card">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-icon" alt="BTC">
+                <div class="coin-name">Bitcoin (BTC)</div>
+            </div>
+            <div class="coin-price" id="harga-btc">Rp Memuat...</div>
+            <div class="input-grup">
+                <label>Jumlah koin Anda:</label>
+                <input type="number" id="input-btc" placeholder="0" oninput="hitungTotal()">
+            </div>
+            <div class="total-nilai" id="total-btc">Total: Rp 0</div>
+        </div>
+
+        <div class="card">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="coin-icon" alt="ETH">
+                <div class="coin-name">Ethereum (ETH)</div>
+            </div>
+            <div class="coin-price" id="harga-eth">Rp Memuat...</div>
+            <div class="input-grup">
+                <label>Jumlah koin Anda:</label>
+                <input type="number" id="input-eth" placeholder="0" oninput="hitungTotal()">
+            </div>
+            <div class="total-nilai" id="total-eth">Total: Rp 0</div>
+        </div>
+
+        <div class="card">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="coin-icon" alt="BNB">
+                <div class="coin-name">Binance (BNB)</div>
+            </div>
+            <div class="coin-price" id="harga-bnb">Rp Memuat...</div>
+            <div class="input-grup">
+                <label>Jumlah koin Anda:</label>
+                <input type="number" id="input-bnb" placeholder="0" oninput="hitungTotal()">
+            </div>
+            <div class="total-nilai" id="total-bnb">Total: Rp 0</div>
+        </div>
+    </div>
+
+    <div class="grand-total-container">
+        <h2>ESTIMASI TOTAL KEKAYAAN</h2>
+        <div id="grand-total-angka">Rp 0</div>
+    </div>
+
+    <script>
+        let hargaBitcoinSekarang = 0;
+        let hargaEthereumSekarang = 0;
+        let hargaBinanceSekarang = 0;
+
+        // --- BAGIAN BARU: Mengambil ingatan saat file baru dibuka ---
+        // Kita periksa apakah ada data yang tersimpan sebelumnya. Jika ada, masukkan ke kotak isian.
+        document.getElementById('input-btc').value = localStorage.getItem('simpananBtc') || '';
+        document.getElementById('input-eth').value = localStorage.getItem('simpananEth') || '';
+        document.getElementById('input-bnb').value = localStorage.getItem('simpananBnb') || '';
+
+        async function ambilHargaCrypto() {
+            const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=idr';
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                hargaBitcoinSekarang = data.bitcoin.idr;
+                hargaEthereumSekarang = data.ethereum.idr;
+                hargaBinanceSekarang = data.binancecoin.idr;
+
+                document.getElementById('harga-btc').innerText = 'Rp ' + hargaBitcoinSekarang.toLocaleString('id-ID');
+                document.getElementById('harga-eth').innerText = 'Rp ' + hargaEthereumSekarang.toLocaleString('id-ID');
+                document.getElementById('harga-bnb').innerText = 'Rp ' + hargaBinanceSekarang.toLocaleString('id-ID');
+
+                const waktuSekarang = new Date(); 
+                document.getElementById('waktu-update').innerText = 'Data akurat per: ' + waktuSekarang.toLocaleTimeString('id-ID');
+
+                hitungTotal();
+
+            } catch (error) {
+                console.error('Terjadi kesalahan:', error);
+                document.getElementById('waktu-update').innerText = 'Gagal terhubung ke server.';
+            }
+        }
+
+        function hitungTotal() {
+            // Mengambil angka dari kotak isian
+            const inputBtcValue = document.getElementById('input-btc').value;
+            const inputEthValue = document.getElementById('input-eth').value;
+            const inputBnbValue = document.getElementById('input-bnb').value;
+
+            // --- BAGIAN BARU: Menyimpan angka yang diketik ke memori (Local Storage) ---
+            localStorage.setItem('simpananBtc', inputBtcValue);
+            localStorage.setItem('simpananEth', inputEthValue);
+            localStorage.setItem('simpananBnb', inputBnbValue);
+
+            const jumlahBtc = Number(inputBtcValue) || 0;
+            const jumlahEth = Number(inputEthValue) || 0;
+            const jumlahBnb = Number(inputBnbValue) || 0;
+
+            const totalBtc = jumlahBtc * hargaBitcoinSekarang;
+            const totalEth = jumlahEth * hargaEthereumSekarang;
+            const totalBnb = jumlahBnb * hargaBinanceSekarang;
+
+            document.getElementById('total-btc').innerText = 'Total: Rp ' + totalBtc.toLocaleString('id-ID');
+            document.getElementById('total-eth').innerText = 'Total: Rp ' + totalEth.toLocaleString('id-ID');
+            document.getElementById('total-bnb').innerText = 'Total: Rp ' + totalBnb.toLocaleString('id-ID');
+
+            const grandTotal = totalBtc + totalEth + totalBnb;
+            document.getElementById('grand-total-angka').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+        }
+
+        ambilHargaCrypto();
+        setInterval(ambilHargaCrypto, 30000); 
+
+    </script>
+</body>
+                  </html>
+  
