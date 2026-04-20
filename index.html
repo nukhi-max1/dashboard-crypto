@@ -8,11 +8,7 @@
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: linear-gradient(135deg, #13131a 0%, #1c1c24 100%);
-            color: #ffffff; 
-            text-align: center; 
-            padding: 30px 15px; 
-            margin: 0;
-            min-height: 100vh;
+            color: #ffffff; text-align: center; padding: 30px 15px; margin: 0; min-height: 100vh;
         }
         h1 { color: #f3ba2f; margin-bottom: 5px; font-size: 2em; }
         p { margin-top: 5px; color: #a0a0b0; }
@@ -63,7 +59,7 @@
     <div class="crypto-container">
         <div class="card">
             <div class="coin-header">
-                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-icon" alt="BTC">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" class="coin-icon" alt="BTC">
                 <div class="coin-name">Bitcoin (BTC)</div>
             </div>
             <div class="coin-price" id="harga-btc">Rp Memuat...</div>
@@ -76,7 +72,7 @@
 
         <div class="card">
             <div class="coin-header">
-                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="coin-icon" alt="ETH">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg" class="coin-icon" alt="ETH">
                 <div class="coin-name">Ethereum (ETH)</div>
             </div>
             <div class="coin-price" id="harga-eth">Rp Memuat...</div>
@@ -89,7 +85,7 @@
 
         <div class="card">
             <div class="coin-header">
-                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="coin-icon" alt="BNB">
+                <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png" class="coin-icon" alt="BNB">
                 <div class="coin-name">Binance (BNB)</div>
             </div>
             <div class="coin-price" id="harga-bnb">Rp Memuat...</div>
@@ -111,8 +107,6 @@
         let hargaEthereumSekarang = 0;
         let hargaBinanceSekarang = 0;
 
-        // --- BAGIAN BARU: Mengambil ingatan saat file baru dibuka ---
-        // Kita periksa apakah ada data yang tersimpan sebelumnya. Jika ada, masukkan ke kotak isian.
         document.getElementById('input-btc').value = localStorage.getItem('simpananBtc') || '';
         document.getElementById('input-eth').value = localStorage.getItem('simpananEth') || '';
         document.getElementById('input-bnb').value = localStorage.getItem('simpananBnb') || '';
@@ -144,12 +138,10 @@
         }
 
         function hitungTotal() {
-            // Mengambil angka dari kotak isian
             const inputBtcValue = document.getElementById('input-btc').value;
             const inputEthValue = document.getElementById('input-eth').value;
             const inputBnbValue = document.getElementById('input-bnb').value;
 
-            // --- BAGIAN BARU: Menyimpan angka yang diketik ke memori (Local Storage) ---
             localStorage.setItem('simpananBtc', inputBtcValue);
             localStorage.setItem('simpananEth', inputEthValue);
             localStorage.setItem('simpananBnb', inputBnbValue);
@@ -175,5 +167,4 @@
 
     </script>
 </body>
-                  </html>
-  
+</html>
