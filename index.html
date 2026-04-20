@@ -13,23 +13,18 @@
         h1 { color: #f3ba2f; margin-bottom: 5px; font-size: 2em; }
         p { margin-top: 5px; color: #a0a0b0; }
         
-        /* --- DESAIN BARU UNTUK TOMBOL MATA UANG --- */
-        #btn-currency {
-            background-color: #2c2c3a;
-            color: #f3ba2f;
-            border: 1px solid #f3ba2f;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+        /* Mengatur tata letak deretan tombol di atas */
+        .kontrol-menu {
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
         }
-        #btn-currency:hover {
-            background-color: #f3ba2f;
-            color: #13131a;
+
+        /* Desain tombol-tombol kita */
+        .btn-aksi {
+            background-color: #2c2c3a; color: #f3ba2f; border: 1px solid #f3ba2f;
+            padding: 10px 20px; border-radius: 20px; font-size: 0.9em; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease;
         }
+        .btn-aksi:hover { background-color: #f3ba2f; color: #13131a; }
 
         #waktu-update { font-size: 0.9em; color: #888899; margin-bottom: 25px; font-style: italic; }
         
@@ -38,10 +33,9 @@
         .card { 
             background-color: #252530; padding: 25px 20px; border-radius: 16px; 
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); width: 240px; 
-            border: 1px solid #333344; transition: transform 0.3s ease; text-align: left; 
-            position: relative;
+            border: 1px solid #333344; transition: transform 0.3s ease; text-align: left;
         }
-        .card:hover { transform: translateY(-5px); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.6); }
         
         .coin-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .coin-icon { width: 32px; height: 32px; }
@@ -64,13 +58,18 @@
 
         .grand-total-container {
             background: linear-gradient(135deg, #f3ba2f 0%, #ff9800 100%);
-            color: #13131a; margin-top: 40px; padding: 20px; border-radius: 16px;
+            color: #13131a; margin-top: 30px; padding: 20px; border-radius: 16px;
             display: inline-block; min-width: 250px; box-shadow: 0 8px 25px rgba(243, 186, 47, 0.4);
-            transition: transform 0.3s ease;
         }
-        .grand-total-container:hover { transform: scale(1.05); } 
         .grand-total-container h2 { margin: 0 0 10px 0; font-size: 1.1em; color: #332200; }
         #grand-total-angka { font-size: 2em; font-weight: bold; }
+
+        /* Wadah Grafik yang sudah diperbaiki */
+        .chart-container {
+            margin-top: 40px; max-width: 800px; margin-left: auto; margin-right: auto;
+            height: 450px; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5); border: 1px solid #333344; background-color: #252530;
+        }
     </style>
 </head>
 <body>
@@ -78,7 +77,10 @@
     <h1>Dashboard Crypto Pro</h1>
     <p>Pantau & Hitung Aset Anda Secara Real-Time</p>
     
-    <button id="btn-currency" onclick="gantiMataUang()">Lihat dalam USD 🇺🇸</button>
+    <div class="kontrol-menu">
+        <button class="btn-aksi" id="btn-currency" onclick="gantiMataUang()">💵 USD 🇺🇸</button>
+        <button class="btn-aksi" id="btn-sensor" onclick="toggleSensor()">👁️ Sembunyikan Saldo</button>
+    </div>
 
     <div id="waktu-update">Terakhir diperbarui: Memuat waktu...</div>
 
@@ -131,61 +133,75 @@
         <div id="grand-total-angka">0</div>
     </div>
 
+    <div class="chart-container">
+        <iframe 
+            src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&theme=dark&style=1&timezone=Asia%2FJakarta&locale=id" 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            allowtransparency="true" 
+            scrolling="no" 
+            allowfullscreen="">
+        </iframe>
+    </div>
+
     <script>
-        // Variabel baru untuk melacak mata uang yang sedang aktif
         let mataUangAktif = 'idr';
         let simbolUang = 'Rp ';
-
-        let hargaBitcoinSekarang = 0;
-        let hargaEthereumSekarang = 0;
-        let hargaBinanceSekarang = 0;
+        let hargaBitcoinSekarang = 0; let hargaEthereumSekarang = 0; let hargaBinanceSekarang = 0;
+        
+        // Memori status sensor (apakah mata ditutup atau dibuka)
+        let saldoDisensor = false;
 
         document.getElementById('input-btc').value = localStorage.getItem('simpananBtc') || '';
         document.getElementById('input-eth').value = localStorage.getItem('simpananEth') || '';
         document.getElementById('input-bnb').value = localStorage.getItem('simpananBnb') || '';
 
-        // Fungsi baru saat tombol diklik
+        // Fungsi baru untuk Mode Privasi
+        function toggleSensor() {
+            saldoDisensor = !saldoDisensor; // Membalikkan status (benar jadi salah, salah jadi benar)
+            const tombolSensor = document.getElementById('btn-sensor');
+            
+            if (saldoDisensor) {
+                tombolSensor.innerText = '👀 Tampilkan Saldo';
+            } else {
+                tombolSensor.innerText = '👁️ Sembunyikan Saldo';
+            }
+            
+            // Langsung perbarui tampilan
+            hitungTotal();
+        }
+
         function gantiMataUang() {
             const tombol = document.getElementById('btn-currency');
             if (mataUangAktif === 'idr') {
-                mataUangAktif = 'usd';
-                simbolUang = '$';
-                tombol.innerText = 'Lihat dalam IDR 🇮🇩';
+                mataUangAktif = 'usd'; simbolUang = '$'; tombol.innerText = 'IDR 🇮🇩';
             } else {
-                mataUangAktif = 'idr';
-                simbolUang = 'Rp ';
-                tombol.innerText = 'Lihat dalam USD 🇺🇸';
+                mataUangAktif = 'idr'; simbolUang = 'Rp '; tombol.innerText = 'USD 🇺🇸';
             }
-            // Ubah teks ke "Memuat" agar terlihat transisinya
             document.getElementById('harga-btc').innerText = 'Memuat...';
             document.getElementById('harga-eth').innerText = 'Memuat...';
             document.getElementById('harga-bnb').innerText = 'Memuat...';
-            
-            // Langsung panggil internet lagi untuk ambil harga baru
             ambilHargaCrypto();
         }
 
         async function ambilHargaCrypto() {
-            // URL sekarang otomatis berubah tergantung mataUangAktif (idr atau usd)
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=${mataUangAktif}&include_24hr_change=true`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // Kita mengambil data secara dinamis berdasarkan mata uang
                 hargaBitcoinSekarang = data.bitcoin[mataUangAktif];
                 hargaEthereumSekarang = data.ethereum[mataUangAktif];
                 hargaBinanceSekarang = data.binancecoin[mataUangAktif];
 
-                // Memformat angka: Jika USD gunakan standar format US, jika IDR format ID
                 const formatLokal = mataUangAktif === 'idr' ? 'id-ID' : 'en-US';
 
                 document.getElementById('harga-btc').innerText = simbolUang + hargaBitcoinSekarang.toLocaleString(formatLokal);
                 document.getElementById('harga-eth').innerText = simbolUang + hargaEthereumSekarang.toLocaleString(formatLokal);
                 document.getElementById('harga-bnb').innerText = simbolUang + hargaBinanceSekarang.toLocaleString(formatLokal);
 
-                // Mengambil persentase dinamis
                 aturPersentase('change-btc', data.bitcoin[`${mataUangAktif}_24h_change`]);
                 aturPersentase('change-eth', data.ethereum[`${mataUangAktif}_24h_change`]);
                 aturPersentase('change-bnb', data.binancecoin[`${mataUangAktif}_24h_change`]);
@@ -197,20 +213,17 @@
 
             } catch (error) {
                 console.error('Terjadi kesalahan:', error);
-                document.getElementById('waktu-update').innerText = 'Gagal terhubung ke server.';
+                document.getElementById('waktu-update').innerText = 'Gagal terhubung ke server. Coba matikan VPN.';
             }
         }
 
         function aturPersentase(idElemen, persentase) {
             const elemen = document.getElementById(idElemen);
             const teksAngka = persentase.toFixed(2) + '%'; 
-            
             if (persentase > 0) {
-                elemen.innerText = '▲ +' + teksAngka; 
-                elemen.className = 'coin-change naik'; 
+                elemen.innerText = '▲ +' + teksAngka; elemen.className = 'coin-change naik'; 
             } else {
-                elemen.innerText = '▼ ' + teksAngka; 
-                elemen.className = 'coin-change turun'; 
+                elemen.innerText = '▼ ' + teksAngka; elemen.className = 'coin-change turun'; 
             }
         }
 
@@ -230,15 +243,23 @@
             const totalBtc = jumlahBtc * hargaBitcoinSekarang;
             const totalEth = jumlahEth * hargaEthereumSekarang;
             const totalBnb = jumlahBnb * hargaBinanceSekarang;
+            const grandTotal = totalBtc + totalEth + totalBnb;
 
             const formatLokal = mataUangAktif === 'idr' ? 'id-ID' : 'en-US';
 
-            document.getElementById('total-btc').innerText = 'Total: ' + simbolUang + totalBtc.toLocaleString(formatLokal);
-            document.getElementById('total-eth').innerText = 'Total: ' + simbolUang + totalEth.toLocaleString(formatLokal);
-            document.getElementById('total-bnb').innerText = 'Total: ' + simbolUang + totalBnb.toLocaleString(formatLokal);
-
-            const grandTotal = totalBtc + totalEth + totalBnb;
-            document.getElementById('grand-total-angka').innerText = simbolUang + grandTotal.toLocaleString(formatLokal);
+            // --- LOGIKA SENSOR ---
+            // Jika tombol sensor diklik, tampilkan bintang. Jika tidak, tampilkan angka asli.
+            if (saldoDisensor) {
+                document.getElementById('total-btc').innerText = 'Total: ' + simbolUang + ' ***';
+                document.getElementById('total-eth').innerText = 'Total: ' + simbolUang + ' ***';
+                document.getElementById('total-bnb').innerText = 'Total: ' + simbolUang + ' ***';
+                document.getElementById('grand-total-angka').innerText = simbolUang + ' ***';
+            } else {
+                document.getElementById('total-btc').innerText = 'Total: ' + simbolUang + totalBtc.toLocaleString(formatLokal);
+                document.getElementById('total-eth').innerText = 'Total: ' + simbolUang + totalEth.toLocaleString(formatLokal);
+                document.getElementById('total-bnb').innerText = 'Total: ' + simbolUang + totalBnb.toLocaleString(formatLokal);
+                document.getElementById('grand-total-angka').innerText = simbolUang + grandTotal.toLocaleString(formatLokal);
+            }
         }
 
         ambilHargaCrypto();
@@ -246,5 +267,4 @@
 
     </script>
 </body>
-                </html>
-    
+</html>
